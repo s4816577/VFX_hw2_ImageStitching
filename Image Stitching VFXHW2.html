@@ -1,0 +1,33 @@
+<div id="doc" class="markdown-body container-fluid"><h1 id="Image-Stitching-VFXHW2" style="">Image Stitching VFXHW2</h1><h3 id="b03902028-劉彥廷-b03902029-李俊賢" style="">b03902028 劉彥廷 b03902029 李俊賢</h3><h2 id="1-How-to-run-our-Code" style="">1. How to run our Code</h2><ol>
+<li>cd to src\</li>
+<li>type (remember the input image sequence must be scene-left to scene-right)<br>
+<code>python main.py --files ..\images\001.JPG ..\images\002.JPG ..\images\003.JPG ..\images\004.JPG ..\images\005.JPG ..\images\006.JPG ..\images\007.JPG ..\images\008.JPG ..\images\009.JPG ..\images\010.JPG ..\images\011.JPG ..\images\012.JPG ..\images\013.JPG ..\images\014.JPG ..\images\015.JPG ..\images\016.JPG ..\images\017.JPG ..\images\018.JPG ..\images\019.JPG ..\images\020.JPG ..\images\021.JPG ..\images\022.JPG ..\images\023.JPG ..\images\024.JPG ..\images\025.JPG ..\images\026.JPG --focallength 961.974</code></li>
+<li>wait for 10~20 min</li>
+<li>it will output <code>stitched_image.png</code> in the current folder</li>
+</ol><h2 id="2-Implementation-Detail" style="">2. Implementation Detail</h2><h4 id="21-Feature-Detection">2.1 Feature Detection</h4><p>We use Harris corner detector to find feature points on images. To restrict the number of feature points, we adopt an naive non-maximal supression method.</p><p>We start picking point from high response. When we find that one of the neighbor of the point we want to pick was already picked, we skip this point. By doing so, we have high quality and well distributed feature points.</p><p>We use the 9x9 patch with feature point as center to describe the corresponding feature point.<br>
+<img src="https://i.imgur.com/K0RFkCF.png" alt=""></p><h4 id="22-Feature-Matching">2.2 Feature Matching</h4><p>We use kd-tree, which professor mentioned in class, to quickly find match feature points.</p><p>To let the works more precisely, we assumed that user should input images with left-to-right order, and by this assumption we forced our matching point’s x should be more than half of image’s width to match the next image.</p><p>At the end of matching, we forced that for each point p’s first and second best match’s distance d1/d2 should be less than 0.95 to ensure the point is specific enough.<br>
+<img src="https://i.imgur.com/OENHlos.png" alt=""><br>
+<img src="https://i.imgur.com/kgLHRng.png" alt=""></p><h4 id="23-Cylindrical-Warping">2.3 Cylindrical Warping</h4><p>We project images and feature points onto a cylindrical surface. Since all image are taken with a fixed center, we can expect that translation will be the only transform on this cylindrical coordinate.</p><p>Also, don’t forget to warp those feature points and let the center of the image to be the warping-origin as well.<br>
+<img src="https://i.imgur.com/D96GlQA.png" alt=""></p><h4 id="24-RANSAC">2.4 RANSAC</h4><p>In this part, we do basically same as the algorithm which professor teached.<br>
+<img src="https://i.imgur.com/1IibF8n.png" alt=""><br>
+<img src="https://i.imgur.com/qtGraJP.png" alt=""></p><h4 id="25-Transition-Calculation">2.5 Transition Calculation</h4><p>Beacuse of using tripod, we basically only consider the transition between images. The following is the transition model we used. Where xi yi are the image_left’s matched feature, xi’ yi’ are image_right’s matched feature, and dx dy are those transition on x-axis and y-axis.<br>
+<img src="https://i.imgur.com/5ZD49DG.png" alt=""></p><p>We slove this by Least-square approximation.</p><h4 id="26-Blending">2.6 Blending</h4><p>At the end, we use linear blending to blend overlap regions, which is also the one professor mentioned in class.<br>
+<img src="https://i.imgur.com/QgY5w6f.png" alt=""></p><h2 id="3-Our-Result" style="">3. Our Result</h2><ol>
+<li>
+<p>Our works<br>
+<img src="https://i.imgur.com/iXqwFvo.jpg" alt=""></p>
+</li>
+<li>
+<p>Professor’s test data<br>
+<img src="https://i.imgur.com/BxIKv1o.jpg" alt=""></p>
+</li>
+</ol><h2 id="4-What-we-learn" style="">4. What we learn</h2><ol>
+<li>It’s hard to get good feature point when the image’s color is too flat.</li>
+<li>Remember to warp the images by taking the image center as the warping origin.</li>
+<li>It’s very very very slow without using kd-trees.</li>
+</ol><h2 id="5-Reference" style="">5. Reference</h2><ol>
+<li>Richard Szeliski, Image Alignment and Stitching: A Tutorial, Foundations and Trends in Computer Graphics and Vision, 2006</li>
+<li>R. Szeliski and H.-Y. Shum. Creating full view panoramic image mosaics and texture-mapped models, SIGGRAPH 1997, pp251-258.</li>
+<li>VFX2011 Edwardhw &amp; Tantofish<br>
+(<a href="http://www.cmlab.csie.ntu.edu.tw/~tantofish/course/vfx/report/stitching.html" target="_blank">http://www.cmlab.csie.ntu.edu.tw/~tantofish/course/vfx/report/stitching.html</a>)</li>
+</ol></div>
